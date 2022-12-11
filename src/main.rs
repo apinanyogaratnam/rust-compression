@@ -8,10 +8,11 @@ use std::io::copy;
 use std::io::BufReader;
 use std::time::Instant;
 
-fn compress() {
+fn compress(compression_type: Option<Compression>) {
+    let compression_type = compression_type.unwrap_or(Compression::default());
     let mut input = BufReader::new(File::open(args().nth(1).unwrap()).unwrap());
     let output = File::create(args().nth(2).unwrap()).unwrap();
-    let mut encoder = GzEncoder::new(output, Compression::default());
+    let mut encoder = GzEncoder::new(output, compression_type);
     let start = Instant::now();
     copy(&mut input, &mut encoder).unwrap();
     let output = encoder.finish().unwrap();
@@ -30,16 +31,21 @@ fn decompress() {
 }
 
 fn main() {
-    if args().len() != 4 {
-        eprintln!("Usage <source> <target>");
-        eprint!("--compress to compress source file to target file");
-        eprint!("--decompress to decompress source file to target file");
+    if args().len() < 4 {
+        eprintln!("Usage <source> <target> <compression_type>");
+        eprintln!("--compress to compress source file to target file");
+        eprintln!("--decompress to decompress source file to target file");
+        eprintln!("--help to show this help");
+        eprintln!("<level> to set compression level (1-9). Used with --compress only");
         return;
     }
 
     match args().nth(3).unwrap().as_str() {
-        "--compress" => compress(),
+        "--compress" => compress(None),
         "--decompress" => decompress(),
+        "--help" => eprintln!("Usage <source> <target> <command>"),
+        "--best" => compress(Some(Compression::best())),
+        "--fast" => compress(Some(Compression::fast())),
         _ => eprintln!("Unknown command"),
     }
 }
