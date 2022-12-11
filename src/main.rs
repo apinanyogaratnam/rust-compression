@@ -16,7 +16,10 @@ fn compress(compression_type: Option<Compression>) {
     let start = Instant::now();
     copy(&mut input, &mut encoder).unwrap();
     let output = encoder.finish().unwrap();
-    println!("Source len: {:?}", input.get_ref().metadata().unwrap().len());
+    println!(
+        "Source len: {:?}",
+        input.get_ref().metadata().unwrap().len()
+    );
     println!("Target len: {:?}", output.metadata().unwrap().len());
     println!("Elapsed: {:?}", start.elapsed());
 }
